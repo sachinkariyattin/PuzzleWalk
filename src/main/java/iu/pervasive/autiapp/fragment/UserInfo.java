@@ -1,6 +1,8 @@
 package iu.pervasive.autiapp.fragment;
 
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -20,8 +22,13 @@ public class UserInfo extends stepperFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(
+        final View v = inflater.inflate(
                 R.layout.fragment_user_info, container, false);
+
+        Resources res = getResources(); //resource handle
+        Drawable drawable = res.getDrawable(R.drawable.user_info);
+        v.setBackground(drawable);
+        return v;
     }
     @Override
     public boolean onNextButtonHandler() {

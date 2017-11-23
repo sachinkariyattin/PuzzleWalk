@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:padding="20sp"
         android:id="@+id/finish"
+        android:textColor="@color/white"
         android:text="@string/finish_fragment" />
 
 </LinearLayout>

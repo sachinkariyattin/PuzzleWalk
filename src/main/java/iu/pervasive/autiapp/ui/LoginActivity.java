@@ -4,6 +4,8 @@ package iu.pervasive.autiapp.ui;
  * Created by Sachin on 11/20/2017.
  */
 import android.app.ProgressDialog;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,12 +29,18 @@ public class LoginActivity extends AppCompatActivity {
     @Bind(R.id.input_email) EditText _emailText;
     @Bind(R.id.input_password) EditText _passwordText;
     @Bind(R.id.btn_login) Button _loginButton;
+    ScrollView loginView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
+        Resources res = getResources(); //resource handle
+
+        loginView = (ScrollView) findViewById(R.id.loginView);
+        Drawable drawable = res.getDrawable(R.drawable.app_background);
+        loginView.setBackground(drawable);
 
         _loginButton.setOnClickListener(new View.OnClickListener() {
 

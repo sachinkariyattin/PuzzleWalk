@@ -1,6 +1,8 @@
 package iu.pervasive.autiapp.fragment;
 
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -30,7 +32,11 @@ public class LocationFragment extends stepperFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_location, container, false);
+        final View v = inflater.inflate(R.layout.fragment_location, container, false);
+        Resources res = getResources(); //resource handle
+        Drawable drawable = res.getDrawable(R.drawable.location);
+        v.setBackground(drawable);
+        return v;
     }
 
 }
