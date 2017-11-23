@@ -75,6 +75,10 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
+    public void deleteAll() {
+        getWritableDatabase().execSQL("DELETE FROM " + DB_NAME );
+    }
+
     /**
      * Query the 'steps' table. Remember to close the cursor!
      *

@@ -30,6 +30,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -58,6 +59,8 @@ import iu.pervasive.autiapp.R;
 import iu.pervasive.autiapp.SensorListener;
 import iu.pervasive.autiapp.util.Logger;
 import iu.pervasive.autiapp.util.Util;
+
+import static android.content.Context.VIBRATOR_SERVICE;
 
 public class Fragment_Overview extends Fragment implements SensorEventListener {
 
@@ -283,6 +286,20 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
         // todayOffset might still be Integer.MIN_VALUE on first start
         int steps_today = Math.max(todayOffset + since_boot, 0);
         sliceCurrent.setValue(steps_today);
+        if (steps_today >= 10 && steps_today <= 20) {
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(500);
+
+            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+            alertDialog.setTitle("Alert");
+            alertDialog.setMessage("Steps today"+ steps_today);
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+        }
         if (goal - steps_today > 0) {
             // goal not reached yet
             if (pg.getData().size() == 1) {

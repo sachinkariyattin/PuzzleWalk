@@ -33,6 +33,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import iu.pervasive.autiapp.BuildConfig;
+import iu.pervasive.autiapp.Database;
 import iu.pervasive.autiapp.R;
 import iu.pervasive.autiapp.SensorListener;
 
@@ -81,6 +82,11 @@ public class Activity_Main extends FragmentActivity {
                 getFragmentManager().beginTransaction()
                         .replace(android.R.id.content, new Fragment_Settings()).addToBackStack(null)
                         .commit();
+                break;
+            case R.id.reset:
+                Database db = Database.getInstance(this);
+                db.deleteAll();
+                db.close();
                 break;
             case R.id.action_about:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
