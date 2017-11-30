@@ -39,8 +39,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eazegraph.lib.charts.BarChart;
 import org.eazegraph.lib.charts.PieChart;
@@ -52,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import iu.pervasive.autiapp.BuildConfig;
 import iu.pervasive.autiapp.Database;
@@ -72,6 +75,31 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
     private int todayOffset, total_start, goal, since_boot, total_days;
     public final static NumberFormat formatter = NumberFormat.getInstance(Locale.getDefault());
     private boolean showSteps = true;
+
+    private boolean milestone20 = false;
+    private boolean milestone40 = false;
+    private boolean milestone60 = false;
+    private boolean milestone80 = false;
+    private boolean milestone100 = false;
+
+    int[] puzzle_images = {R.drawable.p_1, R.drawable.p_2, R.drawable.p_3, R.drawable.p_4, R.drawable.p_5 };
+
+    String[][] options = {
+            {"Speed", "Hiking", "Distance", "Direction"},
+            {"8", "9", "10", "11"},
+            {"15", "25", "35", "45"},
+            {"14", "13", "10", "15"},
+            {"62", "56", "78", "81"}
+    };
+    String[] answers = {
+            "Direction",
+            "9",
+            "35",
+            "14",
+            "56"
+    };
+    int indexQuestion = 0;
+    int actualScore = 0;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -286,19 +314,50 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
         // todayOffset might still be Integer.MIN_VALUE on first start
         int steps_today = Math.max(todayOffset + since_boot, 0);
         sliceCurrent.setValue(steps_today);
-        if (steps_today >= 10 && steps_today <= 20) {
-            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(500);
-
-            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
-            alertDialog.setTitle("Alert");
-            alertDialog.setMessage("Steps today"+ steps_today);
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+        if (steps_today <= 20 && milestone20 == true) {
+            resetMilestones();
+        }
+        if (steps_today >= 20 && steps_today <= 30 && !milestone20) {
+            milestone20 = true;
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            openDialog(buildMilestoneDialog(20));
+        }
+        else if (steps_today >= 40 && steps_today <= 50 && !milestone40) {
+            milestone40 = true;
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            openDialog(buildMilestoneDialog(40));
+        }
+        else if (steps_today >= 60 && steps_today <= 70 && !milestone60) {
+            milestone60 = true;
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            openDialog(buildMilestoneDialog(60));
+        }
+        else if (steps_today >= 80 && steps_today <= 90 && !milestone80) {
+            milestone80 = true;
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            openDialog(buildMilestoneDialog(80));
+        }
+        else if (steps_today >= 100 && steps_today <= 110 && !milestone100){
+            milestone100 = true;
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            openDialog(buildMilestoneDialog(100));
+        }
+        else if (milestone100) {
+            ((Vibrator) getActivity().getSystemService(VIBRATOR_SERVICE)).vibrate(1000);
+            int wonRewards;
+            if (actualScore >= 20) {
+                wonRewards = 4;
+            }
+            else if (actualScore >=10 && actualScore < 20) {
+                wonRewards = 2;
+            }
+            else if (actualScore > 0){
+                wonRewards = 1;
+            }
+            else {
+                wonRewards = 0;
+            }
+            openDialog(finishDialog(wonRewards));
         }
         if (goal - steps_today > 0) {
             // goal not reached yet
@@ -395,6 +454,113 @@ public class Fragment_Overview extends Fragment implements SensorEventListener {
         } else {
             barChart.setVisibility(View.GONE);
         }
+    }
+
+    public int getRandomID(int max_value){
+        return new Random().nextInt(max_value);
+    }
+
+    public AlertDialog.Builder buildDialog2(final String Answer, int question_image, final String[] optns){
+        ImageView image = new ImageView(getActivity());
+        image.setImageResource(question_image);
+
+        return new AlertDialog.Builder(getActivity())
+                .setTitle("Solve the below puzzle")
+                .setView(image)
+                .setSingleChoiceItems(optns, -1, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if(optns[whichButton].equals(Answer)){
+                            actualScore += 5;
+                            dialog.dismiss();
+                            openDialog(correctAnswerDialog());
+                        }else {
+                            actualScore -= 2;
+                            dialog.dismiss();
+                            openDialog(wrongAnswerDialog());
+                        }
+                    }
+                });
+    }
+
+    public void openDialog(AlertDialog.Builder builder) {
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    public AlertDialog.Builder buildMilestoneDialog(int steps) {
+
+        ImageView image = new ImageView(getActivity());
+        image.setImageResource(R.drawable.milestone);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("You reached a milestone "+ steps +" Steps")
+                .setView(image)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        indexQuestion = getRandomID(puzzle_images.length);
+                        openDialog(buildDialog2(answers[indexQuestion], puzzle_images[indexQuestion], options[indexQuestion]));
+                    }
+                });
+        return builder;
+    }
+
+    public AlertDialog.Builder correctAnswerDialog() {
+        ImageView image = new ImageView(getActivity());
+        image.setImageResource(R.drawable.correct);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Right answer !!!  Your score: "+ actualScore)
+                .setView(image)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        return builder;
+    }
+
+    public AlertDialog.Builder wrongAnswerDialog() {
+        ImageView image = new ImageView(getActivity());
+        image.setImageResource(R.drawable.wrong);
+        if (actualScore < 0) {
+            actualScore = 0;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Wrong answer !!! Your score: "+ actualScore)
+                .setView(image)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        return builder;
+    }
+
+    public AlertDialog.Builder finishDialog(int rewards) {
+        ImageView image = new ImageView(getActivity());
+        image.setImageResource(R.drawable.finish);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("You have finished the challenge !!! \n Your score: "+ actualScore + "\n Rewards won "+ rewards + "\n\n Head back home and check the rewards")
+                .setView(image)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        return builder;
+    }
+
+    public void resetMilestones() {
+        milestone20 = false;
+        milestone40 = false;
+        milestone80 = false;
+        milestone60 = false;
+        milestone100 = false;
     }
 
 }
